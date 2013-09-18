@@ -3,8 +3,8 @@ Cooking with Clojure
 
 When I speak to developers about functional programming, they're often interested, but are
 sometimes concerned that functional programming might make it hard to model the "real world".
-The theory goes that the everyday world is full of objects that change state over time, so the
-most natural way to describe it is using object-oriented design. 
+The theory goes that the everyday world is full of objects that evolve over time, so the most
+natural way to describe it is using object-oriented design. 
 
 Leaving aside the question of whether or not programmers should be overly concerned about
 this thing referred to as the "real world", functional programming provides a rich set of
@@ -33,21 +33,21 @@ functions as values that can be passed around isn't possible in many object-orie
 programming languages like Java, but it turns out to be very useful. 
 
 Each stage in the recipe will be represented as a simple hash map. The following represents
-the ingredients for pancakes (measured in grams):
+butterbeans with some water added (measured in grams):
 
-    {:flour 150, :milk 300, :eggs 100}
+    {:butterbeans 150, :water 300}
 
 But we're modelling a process, not a fixed state, so we also need a way to depict time and
-change. The following represents the ingredients for pancakes, five minutes into the recipe.
+change. The following represents the same ingredients, five minutes into the recipe.
 
-    {:time 5, :flour 150, :milk 300, :eggs 100}
+    {:time 5, :butterbeans 150, :water 300}
 
-The process of making pancakes can then be represented as a series of states: 
+The process of preparing a recipe can then be represented as a series of states:
 
     [{:time 0},
-     {:time 1, :flour 150},
-     {:time 3, :flour 150, :eggs 100},
-     {:time 5, :flour 150, :eggs 100, :milk 300}]
+     {:time 1, :butterbeans 150},
+     {:time 3, :butterbeans 150, :water 300},
+     {:time 5, :butterbeans 150, :water 300, :bicarbonate {:teaspoons 1}]
 
 But how do we get from one state to another? This is where the functions come in. Functions are
 just a way of representing a mapping from one state to another. Here is a simple function
@@ -57,14 +57,14 @@ number of minutes:
     (defn takes [dish minutes]
       (-> dish (update-in [:time] #(+ % minutes))))
 
-    (takes {:time 1, :flour 150} 5)
-      ;=> {:time 6, :flour 150} 
+    (takes {:time 1, :butterbeans 150} 5)
+      ;=> {:time 6, :butterbeans 150} 
 
 There's no need to overwrite the original state of the dish. Instead of having objects with
 identity that morph and mutate over time, functions take the original state and produce a new
 state. In the example above, `takes` took a dish that had one minute of elapsed time and 150
-grams of flour, and produced a new state that had six minutes of elapsed time and 150 grams of
-flour. 
+grams of butterbeans, and produced a new state that had six minutes of elapsed time and 150
+grams of butterbeans. 
 
 We can use the `takes` function to build others. Here is a function that mixes in an
 ingredient into a dish. As before, the original dish is not changed; we just create a new state
@@ -73,8 +73,8 @@ of the dish containing the new ingredient and its attributes:
     (defn mix-in [dish ingredient attributes]
       (-> dish (assoc ingredient attributes)))
 
-    (mix-in {:time 6, :flour 150} :milk 300)
-      ;=> {:time 6, :flour 150, :milk 300} 
+    (mix-in {:time 6, :butterbeans 150} :water 300)
+      ;=> {:time 6, :butterbeans 150, :water 300} 
 
 But remember, functions are themselves values in a functional programming language, so we can
 represent the addition of a particular ingredient as a function. Note that `add` is a function
@@ -88,14 +88,14 @@ use a somewhat cryptic identifier when dislaying a function to the screen:
     (add :water 300)
       ;=> #<user$add$fn__329 user$add$fn__329@316ae291>
 
-    (def add-some-water (add :water 300)) 
+    (def add-some-water (add :water 200)) 
 
 `add-some-water` is now a function representing the addition of some water. The function also
 increments the time taken so far in the recipe. We can use it to transform one state into
 another:
 
-    (add-some-water {:time 0, :rice 100})
-      ;=> {:time 1, :rice 100, :water 300}
+    (add-some-water {:time 0, :butterbeans 100})
+      ;=> {:time 1, :butterbeans 100, :water 200}
 
 We can represent any step in our recipe as a function of one state to another. `sit` leaves
 the dish to sit for a certain number of minutes. We need to use `apply` to let the dish sit

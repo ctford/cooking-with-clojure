@@ -46,44 +46,32 @@ The process of preparing a recipe can then be represented as a series of states:
 
     [{:time 0},
      {:time 1, :butterbeans 150},
-     {:time 3, :butterbeans 150, :water 300},
-     {:time 5, :butterbeans 150, :water 300, :bicarbonate {:teaspoons 1}]
+     {:time 3, :butterbeans 150, :water 300}]
 
 But how do we get from one state to another? This is where the functions come in. Functions are
 just a way of representing a mapping from one state to another. Here is a simple function
-that represents the passage of time by incrementing the `:time` key of a dish by a specified
-number of minutes:  
+that represents mixing in a certain amount of an ingredient:
 
-    (defn takes [dish minutes]
-      (-> dish (update-in [:time] #(+ % minutes))))
+    (defn mix-in [dish ingredient quantity]
+      (-> dish (assoc ingredient quantity)))
 
-    (takes {:time 1, :butterbeans 150} 5)
-      ;=> {:time 6, :butterbeans 150} 
+    (mix-in {:time 1, :butterbeans 150} :water 300)
+      ;=> {:time 1, :butterbeans 150, :water 300} 
 
 There's no need to overwrite the original state of the dish. Instead of having objects with
 identity that morph and mutate over time, functions take the original state and produce a new
-state. In the example above, `takes` took a dish that had one minute of elapsed time and 150
-grams of butterbeans, and produced a new state that had six minutes of elapsed time and 150
-grams of butterbeans. 
+state. In the example above, `mix-in` takes a dish that has one minute of elapsed time and 150
+grams of butterbeans, and produced a new state that had one minute of elapsed time, 150
+grams of butterbeans and 300 grams of water. 
 
-We can use the `takes` function to build others. Here is a function that mixes in an
-ingredient into a dish. As before, the original dish is not changed; we just create a new state
-of the dish containing the new ingredient and its attributes:
-
-    (defn mix-in [dish ingredient attributes]
-      (-> dish (assoc ingredient attributes)))
-
-    (mix-in {:time 6, :butterbeans 150} :water 300)
-      ;=> {:time 6, :butterbeans 150, :water 300} 
-
-But remember, functions are themselves values in a functional programming language, so we can
+Remember, functions are themselves values in a functional programming language, so we can
 represent the addition of a particular ingredient as a function. Note that `add` is a function
-that takes the ingredient and its attributes as arguments, and returns another function that
+that takes the ingredient and its quantity as arguments, and returns another function that
 represents the actual addition. Clojure has no good way to print functions, so it's forced to
 use a somewhat cryptic identifier when dislaying a function to the screen:
 
-    (defn add [ingredient attributes]
-      (fn [dish] (-> dish (mix-in ingredient attributes) (takes 1))))
+    (defn add [ingredient quantity]
+      (fn [dish] (-> dish (mix-in ingredient quantity) (mix-in :time 1))))
 
     (add :water 300)
       ;=> #<user$add$fn__329 user$add$fn__329@316ae291>
@@ -98,45 +86,38 @@ another:
       ;=> {:time 1, :butterbeans 100, :water 200}
 
 We can represent any step in our recipe as a function of one state to another. `sit` leaves
-the dish to sit for a certain number of minutes. We need to use `apply` to let the dish sit
-because `sit` returns a function, not a dish:
+the dish to sit for a certain number of minutes:
 
-    (defn sit [minutes]
-      (fn [dish] (-> dish (takes minutes))))
-
-    (apply (sit 5) [{:time 0, :flour 150}])
-      ;=> {:time 5, :flour 150}
+    (defn sit [minutes] (add :time minutes))
     
 `water-for` adds water to the dish based on the weight of a certain ingredient:
 
     (defn water-for [ingredient]
       (fn [dish]
-        (let [water (-> dish ingredient :weight (* 2))]
-          (-> dish ((add :water {:millilitres water})) (takes 2)))))
+        (let [quantity (* 2 (ingredient dish))]
+          (comp (add :water quantity) (add :time 2)))))
 
-    (apply (water-for :beans) [{:time 0, :beans 100}])
-      ;=> {:time 2, :beans 100, :water 200}
-    
+`water-for` builds its function by composing together the addition of water and the addition
+of time using Clojure's `comp` function. Composing together two functions means that the
+output of one is passed as the input to the other, forming a single, composite function.
+
 `drain` just removes all water from the dish:
 
     (def drain
-      (fn [dish] (-> dish (dissoc :water) (takes 3))))
-
-    (apply drain [{:time 2, :beans 100, :water 200}])
-      ;=> {:time 5, :beans 100}
+      (fn [dish] (-> dish (dissoc :water) (mix-in 3))))
     
 The recipe is therefore just a list of functions:
 
     (def recipe
       [(add :beans {:weight 150})
        (water-for :beans)
-       (add :bicarbonate {:teaspooons 1})
        (sit (* 12 60))
        drain])
 
 To work out how the dish changes over the course of its preparation, we just need to
-progressively apply each step to an initial state. Clojure's standard library has a function
-called `reductions` that does that for us, returning a list of all the successive states.
+progressively apply each step to an initial state, which in this case is `{:time 0}`.
+Clojure's standard library has a function called `reductions` that does that for us, returning 
+a list of all the successive states.
 
     (defn preparations [steps]
       (let [perform (fn [dish step] (step dish))]

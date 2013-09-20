@@ -155,17 +155,17 @@ a list of all the successive states.
         (reductions perform {:time 0} steps)))
 
     (preparations recipe)
-      ;=>[{:time 0},
-      ;   {:time 1, :flour 150},
-      ;   {:time 3, :flour 150, :eggs 100},
-      ;   {:time 5, :flour 150, :milk 300, :eggs 100}]
+      ;=> [{:time 0}
+      ;    {:beans {:weight 150}, :time 1}
+      ;    {:beans {:weight 150}, :time 720}
+      ;    {:beans {:weight 150}, :time 3}]
 
 To prepare a receipe, we just need to take the final state:
 
     (defn prepare [steps] (last (preparations steps)))
 
     (prepare recipe)
-      ;=> {:time 5, :flour 150, :milk 300, :eggs 100}]
+      ;=> {:beans {:weight 150}, :time 3}
 
 One advantage of representing a process like this is that we are modelling each state
 explicitly. For example, if we wanted to calculate what ingredients had been added halfway

@@ -17,7 +17,9 @@ that reliably return the same output for the same inputs.
 
 Here are a couple of simple examples of Clojure:
 
-    (+ 2 3)
+    (def y 3)
+
+    (+ 2 y)
       ;=> 5
 
     (reduce + [2 3 4 5])
@@ -31,6 +33,25 @@ The second example has another curious aspect - `+` is being passed as an argume
 `reduce` function, which uses it to boil down a list of numbers into a single total. Using
 functions as values that can be passed around isn't possible in many object-oriented
 programming languages like Java, but it turns out to be very useful. 
+
+Of course, simple expressions on their own aren't very useful. Here is how to define a named
+function in Clojure:
+
+    (defn plus-one [n] (+ 1 n))
+
+    (plus-one 4)
+      ;=> 5
+
+Clojure functions can themselves return functions. Here's a function that makes plus functions.
+Note that while `defn` defines a named function, `fn` creates an anonymous function.
+
+    (defn plus [x]
+      (fn [n] (+ n x)))
+
+    (def plus-three (plus 3))
+
+    (plus-three 4)
+      ;=> 7
 
 Each stage in the recipe will be represented as a simple hash map. The following represents
 butterbeans with some water added (measured in grams):

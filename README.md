@@ -74,7 +74,7 @@ just a way of representing a mapping from one state to another. Here is a simple
 that represents mixing in a certain amount of an ingredient:
 
     (defn mix-in [dish ingredient quantity]
-      (-> dish (assoc ingredient quantity)))
+      (assoc dish ingredient quantity))
 
     (mix-in {:time 1, :butterbeans 150} :water 300)
       ;=> {:time 1, :butterbeans 150, :water 300} 
@@ -92,7 +92,7 @@ represents the actual addition. Clojure has no good way to print functions, so i
 use a somewhat cryptic identifier when dislaying a function to the screen:
 
     (defn add [ingredient quantity]
-      (fn [dish] (-> dish (mix-in ingredient quantity) (mix-in :time 1))))
+      (fn [dish] (mix-in (mix-in dish ingredient quantity) :time 1)))
 
     (add :water 300)
       ;=> #<user$add$fn__329 user$add$fn__329@316ae291>
@@ -125,7 +125,7 @@ output of one is passed as the input to the other, forming a single, composite f
 `drain` just removes all water from the dish:
 
     (def drain
-      (fn [dish] (-> dish (dissoc :water) (mix-in 3))))
+      (fn [dish] (mix-in (dissoc dish :water) 3)))
     
 The recipe is therefore just a list of functions:
 

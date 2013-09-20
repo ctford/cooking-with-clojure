@@ -34,6 +34,13 @@ The third example has a curious aspect - `+` is being passed as an argument to t
 functions as values that can be passed around isn't possible in many object-oriented
 programming languages like Java, but it turns out to be very useful. 
 
+Values in Clojure are immutable, meaning that we never destroy old values, we only create new
+ones representing the new state. Whereas in Java, `y = y + 1` means "add one to `y`", the
+equivalent in Clojure is just a comparison:
+
+    (= y (+ y 1))
+      ;=> false
+
 Of course, simple expressions on their own aren't very useful. Here is how to define a named
 function in Clojure:
 
@@ -45,8 +52,8 @@ function in Clojure:
 Clojure functions can themselves return functions. Here's a function that makes plus functions.
 Note that while `defn` defines a named function, `fn` creates an anonymous function.
 
-    (defn plus [x]
-      (fn [n] (+ n x)))
+    (defn plus [incrementor]
+      (fn [n] (+ incrementor n)))
 
     (def plus-three (plus 3))
 
@@ -109,7 +116,9 @@ another:
 We can represent any step in our recipe as a function of one state to another. `sit` leaves
 the dish to sit for a certain number of minutes:
 
-    (defn sit [minutes] (add :time minutes))
+    (defn sit [minutes]
+      (fn [dish]
+        (mix-in dish :time minutes))))
     
 `water-for` adds water to the dish based on the weight of a certain ingredient:
 
@@ -122,10 +131,11 @@ the dish to sit for a certain number of minutes:
 of time using Clojure's `comp` function. Composing together two functions means that the
 output of one is passed as the input to the other, forming a single, composite function.
 
-`drain` just removes all water from the dish:
+`drain` removes all water from the dish, which takes 3 minutes:
 
     (def drain
-      (fn [dish] (mix-in (dissoc dish :water) 3)))
+      (fn [dish]
+        (mix-in (dissoc dish :water) :time 3)))
     
 The recipe is therefore just a list of functions:
 

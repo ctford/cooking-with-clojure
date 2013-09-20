@@ -25,11 +25,11 @@ Here are a couple of simple examples of Clojure:
     (reduce + [2 3 4 5])
       ;=> 14 
 
-The first example is straightforward enough, though it might seem strange that the function `+`
-appears inside the braces and in the first position. That's the way that all Lisps depict
-function invocation.
+The first example simply binds the name `y` to the value `3`. The second example is
+straightforward enough, though it might seem strange that the function `+` appears inside the
+braces and in the first position. That's the way that all Lisps depict function invocation.
 
-The second example has another curious aspect - `+` is being passed as an argument to the
+The third example has a curious aspect - `+` is being passed as an argument to the
 `reduce` function, which uses it to boil down a list of numbers into a single total. Using
 functions as values that can be passed around isn't possible in many object-oriented
 programming languages like Java, but it turns out to be very useful. 

@@ -54,13 +54,6 @@
     (add-some-water {:time 0, :butterbeans 100})
       ;=> {:time 1, :butterbeans 100, :water 200}
 
-    (defn saute [minutes]
-      (fn [dish]
-        (update-in
-          (assoc dish :temperature 50)
-          [:water]
-          (plus (- minutes)))))
-
     (def room-temperature 21)
 
     (defn sit [minutes]
@@ -70,6 +63,13 @@
                             room-temperature)]
         (mix-in (assoc dish :temperature temperature) :time minutes)))) 
     
+    (defn saute [minutes]
+      (fn [dish]
+        (update-in
+          (assoc dish :temperature 50)
+          [:water]
+          (plus (- minutes)))))
+
     (defn add-water-for [ingredient]
       (fn [dish]
         (let [quantity (* 2 (ingredient dish))]
@@ -117,7 +117,7 @@
     (defn prepare [steps] (last (preparations steps)))
 
     (prepare recipe)
-      ;=> {:beans {:weight 150}, :time 3}
+      ;=> {:olive-oil 5, :garlic 5, :water 35, :beans 300, :time 258, :temperature 30}
 
     (defn ingredients-after [minutes recipe]
       (let [all-states (preparations recipe)

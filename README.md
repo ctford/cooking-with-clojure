@@ -122,64 +122,100 @@ another:
       ;=> {:time 1, :butterbeans 100, :water 200}
 
 We can represent any step in our recipe as a function of one state to another. `sit` leaves
-the dish to sit for a certain number of minutes:
+the dish to sit for a certain number of minutes, cooling it if it's warmer than room temperature:
+
+    (def room-temperature 21)
 
     (defn sit [minutes]
       (fn [dish]
-        (mix-in dish :time minutes))))
-    
-`water-for` adds water to the dish based on the weight of a certain ingredient:
+        (let [temperature (max
+                            (- (:temperature dish) (* 2 minutes))
+                            room-temperature)]
+        (mix-in (assoc dish :temperature temperature) :time minutes)))) 
 
-    (defn water-for [ingredient]
+Sauteing heats up the dish, and evaporates away some of the water:
+
+ (defn saute [minutes]
       (fn [dish]
-        (let [quantity (* 2 (ingredient dish))
-              add-water (comp (add :water quantity) (add :time 2))]
-          (add-water dish))))
+        (update-in
+          (assoc dish :temperature 50)
+          [:water]
+          (plus (- minutes)))))   
 
-`water-for` builds its function by composing together the addition of water and the addition
-of time using Clojure's `comp` function. Composing together two functions means that the
-output of one is passed as the input to the other, forming a single, composite function.
+`add-water-for` adds water to the dish based on the weight of a specified ingredient:
 
-`drain` removes all water from the dish, which takes 3 minutes:
+    (defn add-water-for [ingredient]
+      (fn [dish]
+        (let [quantity (* 2 (ingredient dish))]
+          ((add :water quantity) dish))))
 
-    (def drain
+`soak` transfers mass from `:water` to another ingredient, representing the water being absorbed over time. `drain` removes all water from the dish. Both these steps also take time::
+
+    (defn soak [ingredient minutes]
+      (fn [dish]
+        (let [absorbtion (/ (:water dish) 2)
+              swelling #(mix-in % ingredient absorbtion)
+              reduction #(mix-in % :water (- absorbtion))
+              absorb (comp swelling reduction)]
+         (mix-in (absorb dish) :time minutes))))
+
+    (defn drain []
       (fn [dish]
         (mix-in (dissoc dish :water) :time 3)))
-    
+
 The recipe is therefore just a list of functions:
 
-    (def recipe
+(def recipe
       [(add :beans 150)
-       (water-for :beans)
-       (sit (* 12 60))
-       drain])
+       (add-water-for :beans)
+       (soak :beans (* 4 60))
+       (drain)
+       (add :water 50)
+       (add :garlic 5)
+       (saute 15)
+       (sit 10)
+       (add :olive-oil 5)])
 
 To work out how the dish changes over the course of its preparation, we just need to
-progressively apply each step to an initial state, which in this case is `{:time 0}`.
+progressively apply each step to an initial state, which in this case is `{:time 0, :temperature room-temperature}`.
 Clojure's standard library has a function called `reductions` that does that for us, returning 
 a list of all the successive states.
 
     (defn preparations [steps]
       (let [perform (fn [dish step] (step dish))]
-        (reductions perform {:time 0} steps)))
+        (reductions perform {:time 0, :temperature room-temperature} steps)))
 
     (preparations recipe)
-      ;=> [{:time 0}
-      ;    {:beans {:weight 150}, :time 1}
-      ;    {:beans {:weight 150}, :time 720}
-      ;    {:beans {:weight 150}, :time 3}]
+      ;=> ({:time 0, :temperature 21}
+      ;    {:beans 150, :time 1, :temperature 21}
+      ;    {:water 300, :beans 150, :time 2, :temperature 21}
+      ;    {:water 150, :beans 300, :time 242, :temperature 21}
+      ;    {:beans 300, :time 245, :temperature 21}
+      ;    {:water 50, :beans 300, :time 246, :temperature 21}
+      ;    {:garlic 5, :water 50, :beans 300, :time 247, :temperature 21}
+      ;    {:temperature 50, :garlic 5, :water 35, :beans 300, :time 247}
+      ;    {:temperature 30, :garlic 5, :water 35, :beans 300, :time 257}
+      ;    {:olive-oil 5, :temperature 30, :garlic 5, :water 35, :beans 300, :time 258})
 
 To prepare a receipe, we just need to take the final state:
 
     (defn prepare [steps] (last (preparations steps)))
 
     (prepare recipe)
-      ;=> {:beans {:weight 150}, :time 3}
+      ;=> {:olive-oil 5, :garlic 5, :water 35, :beans 300, :time 258, :temperature 30}
 
 One advantage of representing a process like this is that we are modelling each state
-explicitly. For example, if we wanted to calculate what ingredients had been added halfway
-through the preparation, we could. If our dish had been a mutable object, then each time
+explicitly. For example, if we wanted to calculate what ingredients had been added at a certain time inx 
+the preparation, we could. If our dish had been a mutable object, then each time
 we performed a new step in the recipe the old state would have been lost.
+
+    (defn ingredients-after [minutes recipe]
+      (let [all-states (preparations recipe)
+            state (first (drop-while #(> minutes (:time %)) all-states))]
+        (keys state)))
+
+    (ingredients-after 250 recipe)
+      ;=> (:temperature :garlic :water :beans :time)
 
 Paradoxically, by avoiding changing individual values, functional programming languages make
 representing change itself easier. Though functional programming can be used in any domain

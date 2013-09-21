@@ -68,8 +68,15 @@ a default value of `0` if `nil` is supplied:
     ((safe-plus 4) nil)
       ;=> 4
 
-Each stage in the recipe will be represented as a simple hash map. The following represents
-butterbeans with some water added (measured in grams):
+Each stage in the recipe will be represented as a simple hash map.
+Some functional programming languages, like Haskell, have very sophisticated type systems that
+can tell the compiler when functions are invoked on the wrong kind of arguments. Such systems
+can be tremendously powerful, but they are not strictly necessary for doing functional
+programming. By using Clojure, we do not have to manage types or type annotations, but we must 
+accept the burden of ensuring that we invoke our functions in the right way without strong
+compiler support.
+
+The following represents butterbeans with some water added (measured in grams):
 
     {:butterbeans 150, :water 300}
 
@@ -122,7 +129,8 @@ another:
       ;=> {:time 1, :butterbeans 100, :water 200}
 
 We can represent any step in our recipe as a function of one state to another. `sit` leaves
-the dish to sit for a certain number of minutes, cooling it if it's warmer than room temperature:
+the dish to sit for a certain number of minutes, cooling it if it's warmer than room
+temperature:
 
     (def room-temperature 21)
 
@@ -149,7 +157,8 @@ Sauteing heats up the dish, and evaporates away some of the water:
         (let [quantity (* 2 (ingredient dish))]
           ((add :water quantity) dish))))
 
-`soak` transfers mass from `:water` to another ingredient, representing the water being absorbed over time. `drain` removes all water from the dish. Both these steps also take time::
+`soak` transfers mass from `:water` to another ingredient, representing the water being
+absorbed over time. `drain` removes all water from the dish:
 
     (defn soak [ingredient minutes]
       (fn [dish]
@@ -177,9 +186,9 @@ The recipe is therefore just a list of functions:
        (add :olive-oil 5)])
 
 To work out how the dish changes over the course of its preparation, we just need to
-progressively apply each step to an initial state, which in this case is `{:time 0, :temperature room-temperature}`.
-Clojure's standard library has a function called `reductions` that does that for us, returning 
-a list of all the successive states.
+progressively apply each step to an initial state, which in this case is
+`{:time 0, :temperature room-temperature}`. Clojure's standard library has a function called
+`reductions` that does that for us, returning a list of all the successive states.
 
     (defn preparations [steps]
       (let [perform (fn [dish step] (step dish))]
@@ -205,9 +214,9 @@ To prepare a receipe, we just need to take the final state:
       ;=> {:olive-oil 5, :garlic 5, :water 35, :beans 300, :time 258, :temperature 30}
 
 One advantage of representing a process like this is that we are modelling each state
-explicitly. For example, if we wanted to calculate what ingredients had been added at a certain time inx 
-the preparation, we could. If our dish had been a mutable object, then each time
-we performed a new step in the recipe the old state would have been lost.
+explicitly. For example, if we wanted to calculate what ingredients had been added at a
+certain time in the preparation, we could. If our dish had been a mutable object, then each
+time we performed a new step in the recipe the old state would have been lost:
 
     (defn ingredients-after [minutes recipe]
       (let [all-states (preparations recipe)

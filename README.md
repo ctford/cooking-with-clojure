@@ -130,7 +130,8 @@ another:
 
 We can represent any step in our recipe as a function of one state to another. `sit` leaves
 the dish to sit for a certain number of minutes, cooling it if it's warmer than room
-temperature:
+temperature. For the first time, we'll use Clojure's `(let [...])` form, which allows us to
+create local names:
 
     (def room-temperature 21)
 

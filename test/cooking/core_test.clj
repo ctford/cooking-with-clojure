@@ -6,4 +6,4 @@
   (testing
     (is (=
          (prepare recipe)
-         {:olive-oil 5, :temperature 30, :garlic 5, :water 45, :beans 300, :time 270}))))
+         {:olive-oil 5, :temperature 30, :garlic 5, :water 45, :beans 300, :time 258}))))

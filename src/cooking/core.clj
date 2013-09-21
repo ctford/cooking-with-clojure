@@ -79,7 +79,7 @@
       (fn [dish]
         (let [absorbtion (/ (:water dish) 2)
               swelling #(mix-in % ingredient absorbtion)
-              reduction #(mix-in % ingredient (- absorbtion))
+              reduction #(mix-in % :water (- absorbtion))
               absorb (comp swelling reduction)]
          (mix-in (absorb dish) :time minutes))))
 
@@ -100,15 +100,29 @@
 
     (defn preparations [steps]
       (let [perform (fn [dish step] (step dish))]
-        (reductions perform {:time 0} steps)))
+        (reductions perform {:time 0, :temperature room-temperature} steps)))
 
     (preparations recipe)
-      ;=> [{:time 0}
-      ;    {:beans {:weight 150}, :time 1}
-      ;    {:beans {:weight 150}, :time 720}
-      ;    {:beans {:weight 150}, :time 3}]
+      ;=> ({:time 0, :temperature 21}
+      ;    {:beans 150, :time 1, :temperature 21}
+      ;    {:water 300, :beans 150, :time 2, :temperature 21}
+      ;    {:water 150, :beans 300, :time 242, :temperature 21}
+      ;    {:beans 300, :time 245, :temperature 21}
+      ;    {:water 50, :beans 300, :time 246, :temperature 21}
+      ;    {:garlic 5, :water 50, :beans 300, :time 247, :temperature 21}
+      ;    {:temperature 50, :garlic 5, :water 35, :beans 300, :time 247}
+      ;    {:temperature 30, :garlic 5, :water 35, :beans 300, :time 257}
+      ;    {:olive-oil 5, :temperature 30, :garlic 5, :water 35, :beans 300, :time 258})
 
     (defn prepare [steps] (last (preparations steps)))
 
     (prepare recipe)
       ;=> {:beans {:weight 150}, :time 3}
+
+    (defn ingredients-after [minutes recipe]
+      (let [all-states (preparations recipe)
+            state (first (drop-while #(> minutes (:time %)) all-states))]
+        (keys state)))
+
+    (ingredients-after 250 recipe)
+      ;=> (:temperature :garlic :water :beans :time)

@@ -43,13 +43,13 @@
     (mix-in {:time 1, :butterbeans 150} :water 300)
       ;=> {:time 1, :butterbeans 150, :water 300} 
 
-    (defn add [ingredient quantity]
-      (fn [dish] (mix-in (mix-in dish ingredient quantity) :time 1)))
+    (defn add [ingredient quantity duration]
+      (fn [dish] (mix-in (mix-in dish ingredient quantity) :time duration)))
 
-    (add :water 300)
+    (add :water 300 1)
       ;=> #<user$add$fn__329 user$add$fn__329@316ae291>
 
-    (def add-some-water (add :water 200)) 
+    (def add-some-water (add :water 200 1)) 
 
     (add-some-water {:time 0, :butterbeans 100})
       ;=> {:time 1, :butterbeans 100, :water 200}
@@ -60,16 +60,15 @@
     
     (defn water-for [ingredient]
       (fn [dish]
-        (let [quantity (* 2 (ingredient dish))
-              add-water (comp (add :water quantity) (add :time 2))]
-          (add-water dish))))
+        (let [quantity (* 2 (ingredient dish))]
+          ((add :water quantity 3) dish))))
 
     (def drain
       (fn [dish]
         (mix-in (dissoc dish :water) :time 3)))
     
     (def recipe
-      [(add :beans 150)
+      [(add :beans 150 1)
        (water-for :beans)
        (sit (* 12 60))
        drain])

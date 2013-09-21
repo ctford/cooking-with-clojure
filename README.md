@@ -175,16 +175,16 @@ absorbed over time. `drain` removes all water from the dish:
 
 The recipe is therefore just a list of functions:
 
-(def recipe
-      [(add :beans 150)
-       (add-water-for :beans)
-       (soak :beans (* 4 60))
-       (drain)
-       (add :water 50)
-       (add :garlic 5)
-       (saute 15)
-       (sit 10)
-       (add :olive-oil 5)])
+    (def recipe
+          [(add :beans 150)
+           (add-water-for :beans)
+           (soak :beans (* 4 60))
+           (drain)
+           (add :water 50)
+           (add :garlic 5)
+           (saute 15)
+           (sit 10)
+           (add :olive-oil 5)])
 
 To work out how the dish changes over the course of its preparation, we just need to
 progressively apply each step to an initial state, which in this case is

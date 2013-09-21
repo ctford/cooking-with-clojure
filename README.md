@@ -144,12 +144,12 @@ create local names:
 
 Sauteing heats up the dish, and evaporates away some of the water:
 
- (defn saute [minutes]
-      (fn [dish]
-        (update-in
-          (assoc dish :temperature 50)
-          [:water]
-          (plus (- minutes)))))   
+   (defn saute [minutes]
+     (fn [dish]
+       (update-in
+         (assoc dish :temperature 50)
+         [:water]
+         (plus (- minutes)))))
 
 `add-water-for` adds water to the dish based on the weight of a specified ingredient:
 

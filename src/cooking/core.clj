@@ -55,7 +55,7 @@
       ;=> {:time 1, :butterbeans 100, :water 200}
 
 
-    (defn fry [minutes]
+    (defn saute [minutes]
       (fn [dish]
         (update-in
           (assoc dish :temperature 50)
@@ -95,7 +95,7 @@
        (drain)
        (add :water 50 1)
        (add :garlic 5 1)
-       (fry 5)
+       (saute 15)
        (add :olive-oil 5 1)
        (sit 10)])
 

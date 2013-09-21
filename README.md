@@ -60,6 +60,14 @@ Note that while `defn` defines a named function, `fn` creates an anonymous funct
     (plus-three 4)
       ;=> 7
 
+Here's another function that works like `plus`, but uses Clojure's `fnil` function to use 
+a default value of `0` if `nil` is supplied:
+
+    (defn safe-plus [n] (fnil (plus n) 0))
+
+    ((safe-plus 4) nil)
+      ;=> 4
+
 Each stage in the recipe will be represented as a simple hash map. The following represents
 butterbeans with some water added (measured in grams):
 
@@ -81,7 +89,7 @@ just a way of representing a mapping from one state to another. Here is a simple
 that represents mixing in a certain amount of an ingredient:
 
     (defn mix-in [dish ingredient quantity]
-      (assoc dish ingredient quantity))
+      (update-in dish [ingredient] (safe-plus quantity)))
 
     (mix-in {:time 1, :butterbeans 150} :water 300)
       ;=> {:time 1, :butterbeans 150, :water 300} 
@@ -124,8 +132,9 @@ the dish to sit for a certain number of minutes:
 
     (defn water-for [ingredient]
       (fn [dish]
-        (let [quantity (* 2 (ingredient dish))]
-          (comp (add :water quantity) (add :time 2)))))
+        (let [quantity (* 2 (ingredient dish))
+              add-water (comp (add :water quantity) (add :time 2))]
+          (add-water dish))))
 
 `water-for` builds its function by composing together the addition of water and the addition
 of time using Clojure's `comp` function. Composing together two functions means that the
@@ -140,7 +149,7 @@ output of one is passed as the input to the other, forming a single, composite f
 The recipe is therefore just a list of functions:
 
     (def recipe
-      [(add :beans {:weight 150})
+      [(add :beans 150)
        (water-for :beans)
        (sit (* 12 60))
        drain])

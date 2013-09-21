@@ -23,6 +23,12 @@
 
     (plus-three 4)
       ;=> 7
+
+    (defn safe-plus [n] (fnil (plus n) 0))
+
+    ((safe-plus 4) nil)
+      ;=> 4
+
     {:butterbeans 150, :water 300}
 
     {:time 5, :butterbeans 150, :water 300}
@@ -32,7 +38,7 @@
      {:time 3, :butterbeans 150, :water 300}]
 
     (defn mix-in [dish ingredient quantity]
-      (assoc dish ingredient quantity))
+      (update-in dish [ingredient] (safe-plus quantity)))
 
     (mix-in {:time 1, :butterbeans 150} :water 300)
       ;=> {:time 1, :butterbeans 150, :water 300} 
@@ -52,12 +58,19 @@
       (fn [dish]
         (mix-in dish :time minutes))) 
     
+    (defn water-for [ingredient]
+      (fn [dish]
+        (let [quantity (* 2 (ingredient dish))
+              add-water (comp (add :water quantity) (add :time 2))]
+          (add-water dish))))
+
     (def drain
       (fn [dish]
         (mix-in (dissoc dish :water) :time 3)))
     
     (def recipe
-      [(add :beans {:weight 150})
+      [(add :beans 150)
+       (water-for :beans)
        (sit (* 12 60))
        drain])
 

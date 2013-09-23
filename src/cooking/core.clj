@@ -65,10 +65,9 @@
     
     (defn saute [minutes]
       (fn [dish]
-        (update-in
-          (assoc dish :temperature 50)
-          [:water]
-          (plus (- minutes)))))
+        (let [hot-dish (assoc dish :temperature 50)
+              reduced-dish (update-in hot-dish [:water] (plus (- minutes)))]
+          (mix-in reduced-dish :time minutes))))
 
     (defn add-water-for [ingredient]
       (fn [dish]
@@ -110,14 +109,14 @@
       ;    {:beans 300, :time 245, :temperature 21}
       ;    {:water 50, :beans 300, :time 246, :temperature 21}
       ;    {:garlic 5, :water 50, :beans 300, :time 247, :temperature 21}
-      ;    {:temperature 50, :garlic 5, :water 35, :beans 300, :time 247}
-      ;    {:temperature 30, :garlic 5, :water 35, :beans 300, :time 257}
-      ;    {:olive-oil 5, :temperature 30, :garlic 5, :water 35, :beans 300, :time 258})
+      ;    {:temperature 50, :garlic 5, :water 35, :beans 300, :time 262}
+      ;    {:temperature 30, :garlic 5, :water 35, :beans 300, :time 272}
+      ;    {:olive-oil 5, :temperature 30, :garlic 5, :water 35, :beans 300, :time 273})
 
     (defn prepare [steps] (last (preparations steps)))
 
     (prepare recipe)
-      ;=> {:olive-oil 5, :garlic 5, :water 35, :beans 300, :time 258, :temperature 30}
+      ;=> {:olive-oil 5, :garlic 5, :water 35, :beans 300, :time 273, :temperature 30}
 
     (defn ingredients-after [minutes recipe]
       (let [all-states (preparations recipe)

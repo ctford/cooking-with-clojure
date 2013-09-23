@@ -170,11 +170,10 @@ Sauteing heats up the dish, and evaporates away some of the water:
 
 ```clojure
 (defn saute [minutes]
- (fn [dish]
-   (update-in
-     (assoc dish :temperature 50)
-     [:water]
-     (plus (- minutes)))))
+  (fn [dish]
+    (let [hot-dish (assoc dish :temperature 50)
+          reduced-dish (update-in hot-dish [:water] (plus (- minutes)))]
+      (mix-in reduced-dish :time minutes))))
 ```
 
 `add-water-for` adds water to the dish based on the weight of a specified ingredient:
@@ -236,9 +235,9 @@ progressively apply each step to an initial state, which in this case is
   ;    {:time 245, :temperature 21, :beans 300}
   ;    {:time 246, :temperature 21, :water 50, :beans 300}
   ;    {:time 247, :temperature 21, :garlic 5, :water 50, :beans 300}
-  ;    {:time 247, :temperature 50, :garlic 5, :water 35, :beans 300}
-  ;    {:time 257, :temperature 30, :garlic 5, :water 35, :beans 300}
-  ;    {:time 258, :temperature 30, :olive-oil 5, :garlic 5, :water 35, :beans 300, :time 258})
+  ;    {:time 262, :temperature 50, :garlic 5, :water 35, :beans 300}
+  ;    {:time 272, :temperature 30, :garlic 5, :water 35, :beans 300}
+  ;    {:time 273, :temperature 30, :olive-oil 5, :garlic 5, :water 35, :beans 300, :time 258})
 ```
 
 To prepare a receipe, we just need to take the final state:
@@ -247,7 +246,7 @@ To prepare a receipe, we just need to take the final state:
 (defn prepare [steps] (last (preparations steps)))
 
 (prepare recipe)
-  ;=> {:time 258, :temperature 30, :olive-oil 5, :garlic 5, :water 35, :beans 300}
+  ;=> {:time 273, :temperature 30, :olive-oil 5, :garlic 5, :water 35, :beans 300}
 ```
 
 One advantage of representing a process like this is that we are modelling each state

@@ -79,8 +79,8 @@ a default value of `0` if `nil` is supplied:
 ```
 
 Each stage in the recipe will be represented as a simple hash map.
-Some functional programming languages, like Haskell, have very sophisticated type systems that
-can tell the compiler when functions are invoked on the wrong kind of arguments. Such systems
+Some functional programming languages, like [Haskell](http://www.haskell.org/), have very sophisticated type systems
+that can tell the compiler when functions are invoked on the wrong kind of arguments. Such systems
 can be tremendously powerful, but they are not strictly necessary for doing functional
 programming. By using Clojure, we do not have to manage types or type annotations, but we must 
 accept the burden of ensuring that we invoke our functions in the right way without strong

@@ -230,15 +230,15 @@ progressively apply each step to an initial state, which in this case is
 
 (preparations recipe)
   ;=> ({:time 0, :temperature 21}
-  ;    {:beans 150, :time 1, :temperature 21}
-  ;    {:water 300, :beans 150, :time 2, :temperature 21}
-  ;    {:water 150, :beans 300, :time 242, :temperature 21}
-  ;    {:beans 300, :time 245, :temperature 21}
-  ;    {:water 50, :beans 300, :time 246, :temperature 21}
-  ;    {:garlic 5, :water 50, :beans 300, :time 247, :temperature 21}
-  ;    {:temperature 50, :garlic 5, :water 35, :beans 300, :time 247}
-  ;    {:temperature 30, :garlic 5, :water 35, :beans 300, :time 257}
-  ;    {:olive-oil 5, :temperature 30, :garlic 5, :water 35, :beans 300, :time 258})
+  ;    {:time 1, :temperature 21, :beans 150}
+  ;    {:time 2, :temperature 21, :water 300, :beans 150}
+  ;    {:time 242, :temperature 21, :water 150, :beans 300}
+  ;    {:time 245, :temperature 21, :beans 300}
+  ;    {:time 246, :temperature 21, :water 50, :beans 300}
+  ;    {:time 247, :temperature 21, :garlic 5, :water 50, :beans 300}
+  ;    {:time 247, :temperature 50, :garlic 5, :water 35, :beans 300}
+  ;    {:time 257, :temperature 30, :garlic 5, :water 35, :beans 300}
+  ;    {:time 258, :temperature 30, :olive-oil 5, :garlic 5, :water 35, :beans 300, :time 258})
 ```
 
 To prepare a receipe, we just need to take the final state:
@@ -247,7 +247,7 @@ To prepare a receipe, we just need to take the final state:
 (defn prepare [steps] (last (preparations steps)))
 
 (prepare recipe)
-  ;=> {:olive-oil 5, :garlic 5, :water 35, :beans 300, :time 258, :temperature 30}
+  ;=> {:time 258, :temperature 30, :olive-oil 5, :garlic 5, :water 35, :beans 300}
 ```
 
 One advantage of representing a process like this is that we are modelling each state
@@ -262,7 +262,7 @@ time we performed a new step in the recipe the old state would have been lost:
     (keys state)))
 
 (ingredients-after 250 recipe)
-  ;=> (:temperature :garlic :water :beans :time)
+  ;=> (:time :temperature :garlic :water :beans)
 ```
 
 Paradoxically, by avoiding changing individual values, functional programming languages make

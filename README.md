@@ -1,5 +1,5 @@
-Cooking with Clojure
-====================
+Cooking with [Clojure](http://clojure.org/)
+===========================================
 
 When I speak to developers about functional programming, they're often interested, but are
 sometimes concerned that functional programming might make it hard to model the "real world".

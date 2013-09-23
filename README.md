@@ -266,5 +266,6 @@ time we performed a new step in the recipe the old state would have been lost:
 
 Paradoxically, by avoiding changing individual values, functional programming languages make
 representing change itself easier. Though functional programming can be used in any domain
-that object-oriented programming can, I have personally found that domains where time and change
-are important concepts are where functional programming languages like Clojure really shine.
+that object-oriented programming can, I have personally found that domains where time and
+change are important concepts are where functional programming languages like Clojure really
+shine.

@@ -24,7 +24,7 @@ Here are a couple of simple examples of Clojure:
   ;=> 5
 
 (reduce + [2 3 4 5])
-      ;=> 14 
+   ;=> 14 
 ```
 
 The first example simply binds the name `y` to the value `3`. The second example is
